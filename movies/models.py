@@ -8,6 +8,28 @@ class Movie(models.Model):
     price = models.IntegerField()
     description = models.TextField()
     image = models.ImageField(upload_to='movie_images/')
+    
+    def get_average_rating(self):
+        """Calculate average rating for this movie"""
+        ratings = self.ratings.all()
+        if ratings.count() > 0:
+            total = sum(rating.stars for rating in ratings)
+            return round(total / ratings.count(), 1)
+        return 0
+    
+    def get_rating_count(self):
+        """Get total number of ratings"""
+        return self.ratings.count()
+    
+    def get_user_rating(self, user):
+        """Get user's rating for this movie"""
+        if user.is_authenticated:
+            try:
+                return self.ratings.get(user=user)
+            except:
+                return None
+        return None
+    
     def __str__(self):
         return str(self.id) + ' - ' + self.name
     
@@ -99,3 +121,26 @@ class Vote(models.Model):
     
     class Meta:
         unique_together = ('petition', 'user')  # Ensure one vote per user per petition
+
+class Rating(models.Model):
+    STAR_CHOICES = [
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ]
+    
+    id = models.AutoField(primary_key=True)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    stars = models.IntegerField(choices=STAR_CHOICES)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.username} rated {self.movie.name} - {self.stars} stars"
+    
+    class Meta:
+        unique_together = ('movie', 'user')  # Ensure one rating per user per movie
+        ordering = ['-created_at']

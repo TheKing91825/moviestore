@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Movie, Review, Reply, Petition, Vote
+from .models import Movie, Review, Reply, Petition, Vote, Rating
 class MovieAdmin(admin.ModelAdmin):
     ordering = ['name']
     search_fields = ['name']
@@ -23,3 +23,12 @@ class VoteAdmin(admin.ModelAdmin):
 
 admin.site.register(Petition, PetitionAdmin)
 admin.site.register(Vote, VoteAdmin)
+
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ['movie', 'user', 'stars', 'created_at']
+    list_filter = ['stars', 'created_at']
+    search_fields = ['movie__name', 'user__username']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at', 'updated_at']
+
+admin.site.register(Rating, RatingAdmin)
