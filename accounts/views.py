@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from .forms import CustomUserCreationForm, CustomErrorList
+from .forms import SignUpForm, UpdateRegionForm, CustomErrorList
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 @login_required
 def logout(request):
@@ -29,12 +30,13 @@ def signup(request):
     template_data['title'] = 'Sign Up'
 
     if request.method == 'GET':
-        template_data['form'] = CustomUserCreationForm()
+        template_data['form'] = SignUpForm()
         return render(request, 'accounts/signup.html', {'template_data': template_data})
     elif request.method == 'POST':
-        form = CustomUserCreationForm(request.POST, error_class=CustomErrorList)
+        form = SignUpForm(request.POST, error_class=CustomErrorList)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Account created successfully! Please log in.')
             return redirect('accounts.login')
         else:
             template_data['form'] = form
@@ -47,3 +49,23 @@ def orders(request):
     template_data['orders'] = request.user.order_set.all()
     return render(request, 'accounts/orders.html',
         {'template_data': template_data})
+
+@login_required
+def update_region(request):
+    """Allow users to update their region"""
+    profile = request.user.profile
+    
+    if request.method == 'POST':
+        form = UpdateRegionForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your region has been updated successfully!')
+            return redirect('trending.map')
+    else:
+        form = UpdateRegionForm(instance=profile)
+    
+    template_data = {
+        'title': 'Update Your Region',
+        'form': form
+    }
+    return render(request, 'accounts/update_region.html', {'template_data': template_data})
