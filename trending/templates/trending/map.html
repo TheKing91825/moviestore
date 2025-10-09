@@ -227,83 +227,9 @@
 </div>
 
 <script>
-// Simple and Accurate SVG Coordinate Tracker
-function addCoordinateTracker() {
-  const svg = document.querySelector('svg');
-  
-  const coordinateDisplay = document.createElement('div');
-  coordinateDisplay.id = 'coordinate-display';
-  coordinateDisplay.style.cssText = `
-    position: fixed; 
-    top: 10px; 
-    left: 10px; 
-    background: rgba(0,0,0,0.9); 
-    color: white; 
-    padding: 15px; 
-    border-radius: 8px; 
-    font-family: monospace;
-    font-size: 14px;
-    z-index: 9999;
-    border: 2px solid #333;
-  `;
-  document.body.appendChild(coordinateDisplay);
-
-  // Create SVG point for accurate coordinate transformation
-  const svgPoint = svg.createSVGPoint();
-
-  function getSVGCoordinates(e) {
-    // Set the point to the mouse coordinates
-    svgPoint.x = e.clientX;
-    svgPoint.y = e.clientY;
-    
-    // Transform the point to SVG coordinates
-    const ctm = svg.getScreenCTM().inverse();
-    const transformedPoint = svgPoint.matrixTransform(ctm);
-    
-    return {
-      x: Math.round(transformedPoint.x),
-      y: Math.round(transformedPoint.y)
-    };
-  }
-
-  svg.addEventListener('mousemove', function(e) {
-    const coords = getSVGCoordinates(e);
-    coordinateDisplay.innerHTML = `
-      <strong>SVG Coordinates:</strong><br>
-      X: ${coords.x}, Y: ${coords.y}<br>
-      <small style="color: #ccc;">Click to copy: ${coords.x},${coords.y}</small>
-    `;
-  });
-
-  svg.addEventListener('click', function(e) {
-    const coords = getSVGCoordinates(e);
-    const coordString = `${coords.x},${coords.y}`;
-    
-    console.log(`Clicked at SVG coordinates: ${coords.x}, ${coords.y}`);
-    
-    // Copy to clipboard
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(coordString);
-    }
-    
-    // Visual feedback
-    coordinateDisplay.style.background = 'rgba(0,128,0,0.9)';
-    coordinateDisplay.innerHTML = `
-      <strong>COPIED!</strong><br>
-      X: ${coords.x}, Y: ${coords.y}<br>
-      <small style="color: #ccc;">${coordString}</small>
-    `;
-    
-    setTimeout(() => {
-      coordinateDisplay.style.background = 'rgba(0,0,0,0.9)';
-    }, 500);
-  });
-}
-
 // Region selection functionality
 document.addEventListener('DOMContentLoaded', function() {
   // Add coordinate tracker for debugging
-  addCoordinateTracker();
   
   const regionGroups = document.querySelectorAll('.region-group');
   const regionDetails = document.querySelectorAll('.region-details');
